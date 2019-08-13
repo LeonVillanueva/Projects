@@ -1,0 +1,5 @@
+name: midi
+channels:
+  - defaults
+prefix: C:\FartherSkies\Anaconda3\envs\midi\envs\midi
+
