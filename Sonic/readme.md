@@ -4,7 +4,7 @@ Sonic is a Python project dealing with MIDI analysis, parsing, and (eventually) 
 
 ## Installation
 
-Please kindly copy .ipynb files into your own working directory. MIDI files in _'midi-ai'_ folder are optional.
+Please kindly copy .ipynb files into your own working directory. MIDI files in _'midi_sonic'_ folder are optional.
 
 ## Usage
 
