@@ -36,7 +36,7 @@ def reward_function(params):
     heading = params['heading'] # float, yaw, -180:+180
     progress = params['progress'] # float, 0:100
 	
-	# constants and initialize reward#
+	# constants and initialize reward #
 	
 	MAX_REWARD = 1e2
 	MIN_REWARD = 1e-3
@@ -46,8 +46,7 @@ def reward_function(params):
 	STEERING_THRESHOLD = 20.0
 	
 	reward = math.exp (-13 * from_center) # non-zero positive small
-	
-	
+		
 	# functions #
 	
 	def always_track (sub_reward, all_wheels): # rewards for always within tracks
@@ -62,8 +61,8 @@ def reward_function(params):
 			sub_reward *= 1.2
 		return sub_reward
 	
-	def turn_slow (sub_reward, steering_abs, speed): # rewards for slow turns
-		if steering_abs < SHARP and speed > 2:
+	def turn_slow (sub_reward, steering_abs, speed): # negative rewards for fast turns
+		if steering_abs > SHARP and speed > 2:
 			sub_reward -= 5
 		return sub_reward
 		
@@ -76,10 +75,7 @@ def reward_function(params):
 		sub_reward += math.floor (progress)
 		return sub_reward
 		
-			
-		
 	# rewards aggregation
-	
 	
 	reward = always_track (reward, all_wheels)
 	reward = straight_run (reward, steering_abs, speed)
@@ -87,5 +83,14 @@ def reward_function(params):
 	reward = no_zigzag (reward, steering_abs)
 	reward = finishing (reward, progress)
 
+	'''
+	Annotations :
+		https://docs.aws.amazon.com/deepracer/latest/developerguide/awsracerdg.pdf#deepracer-get-started
+		https://github.com/VilemR/AWS_DeepRacer
+		https://github.com/hamham1004/DeepRacer/blob/master/reward_function.py
+		https://github.com/sasasavic82/deepracer-reward/blob/master/model/reward_v1.py
+		https://github.com/tgjohnst/DeepestRacer
+		https://github.com/anhdle14/aws-deepracer
+	'''
 
 	return float (reward)
