@@ -28,38 +28,64 @@ def reward_function(params):
     from_center = params['distance_from_center'] # float, 0:~track_width/2
     is_left = params['is_left_of_center'] # boolean
     track_width = params['track_width'] # float
-    steering_float = params['steering_angle'] # float
-	steering_abs = abs(params['steering_angle']) # float
+    steering_float = params['steering_angle'] # float, -30:30
+	steering_abs = abs(params['steering_angle']) # float, 0:30
     speed = params['speed'] # float, 0:5
     waypoints = params['waypoints'] # [[float_x, float_y], ...] # does not exists on track
     closest_waypoints = params['closest_waypoints'] # [float_x, float_y] # does not exists on track
-    heading = params['heading'] # float, yaw
+    heading = params['heading'] # float, yaw, -180:+180
     progress = params['progress'] # float, 0:100
 	
-	# constants and initialize #
+	# constants and initialize reward#
 	
-	MAX_REWARD = 1000
+	MAX_REWARD = 1e2
 	MIN_REWARD = 1e-3
 	
-	MAX_STEER = 30
-	DLT_STEER = 10
+	STRAIGHT = 1
+	SHARP = 10
+	STEERING_THRESHOLD = 20.0
 	
-	reward = math.exp (-1 * d
+	reward = math.exp (-13 * from_center) # non-zero positive small
 	
 	
 	# functions #
 	
-	def always_track
+	def always_track (sub_reward, all_wheels): # rewards for always within tracks
 		if not all_wheels:
-			reward = -1   
-		else if params["progress"] == 1 :
-			reward = 10
-		return reward
+			sub_reward = MIN_REWARD   
+		else:
+			sub_reward = MAX_REWARD
+		return sub_reward
+		
+	def straight_run (sub_reward, steering_abs, speed): # rewards for speed on straights
+		if steering_abs < STRAIGHT and speed > 2:
+			sub_reward *= 1.2
+		return sub_reward
+	
+	def turn_slow (sub_reward, steering_abs, speed): # rewards for slow turns
+		if steering_abs < SHARP and speed > 2:
+			sub_reward -= 5
+		return sub_reward
+		
+	def no_zigzag (sub_reward, steering_abs): # reward reduction for zigzag
+		if steering_abs > STEERING_THRESHOLD:
+			sub_reward *= 0.8
+		return sub_reward
+		
+	def finishing (sub_reward, progress): # rewards for finishing, cumulative
+		sub_reward += math.floor (progress)
+		return sub_reward
+		
+			
 		
 	# rewards aggregation
 	
 	
-	reward = always_track(reward, on_track)
+	reward = always_track (reward, all_wheels)
+	reward = straight_run (reward, steering_abs, speed)
+	reward = turn_slow (reward, steering_abs, speed)
+	reward = no_zigzag (reward, steering_abs)
+	reward = finishing (reward, progress)
 
 
 	return float (reward)
