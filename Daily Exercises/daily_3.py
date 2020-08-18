@@ -25,3 +25,18 @@ def daily_simple(nums):
     while i in s:
         i += 1
     return i
+
+def daily_reverse(nums):
+    p = [x for x in nums if (x > 0)]
+    r = reverse (set (p))
+    l = len (r)
+    m = max (r)
+    if l == r:
+        return m + 1
+    else:
+        while l > 0:
+            l -= 1
+            if m - 1 not in r:
+                return m - 1
+            else:
+                m -= 1
