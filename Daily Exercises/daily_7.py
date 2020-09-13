@@ -2,10 +2,20 @@
 Given the root of a binary tree, find the most frequent subtree sum. The subtree sum of a node is the sum of all values under a node, including the node itself.
 '''
 
-def db_count ():
-    
+def db_count (root, l, r):
+    db_list = [root, l, r]
+    db_count = {}
+    for i in range(len(db_list)):
+        if db_count[db_list[i]] in db_count.key():
+            db_count[db_list[i]] += 1
+        else:
+            db_count[db_list[i]] = 1
+        if db_count[sum(db_list.pop(i))] in db_count.key():
+            db_count[sum(db_list.pop(i))] += 1
+        else:
+            db_count[sum(db_list.pop(i))]
 
-
+    return max(db_count, key=db_count.get)
 
 # given solution
 
