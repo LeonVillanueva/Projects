@@ -9,9 +9,8 @@ def check_palindrome_str(num):
 import math
 
 def check_palindrome_num(num):
-    while num % 10 != 0:
+    while math.floor(num) != num:
         num *= 10
-    num = int (num / 10)
     num_c = num
 
     digits = int(math.log10(num))
