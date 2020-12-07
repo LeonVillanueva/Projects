@@ -9,3 +9,8 @@ def pythogorean (x):
         z.append(z.pop(i))
         check.append(z[0]**2 + z[1]**2 - z[2]**2 == 0)
     return sum(check) > 0
+
+def pyth_sort (x):
+    # property a < b < c
+    x = sorted (x)
+    return x[0]**2 + x[1]**2 - x[2]**2 == 0
